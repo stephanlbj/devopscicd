@@ -1,0 +1,55 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches:
+      - dev
+      - staging
+      - main
+  pull_request:
+    branches:
+      - staging
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy
+        run: |
+          if [ "${GITHUB_REF}" == "refs/heads/staging" ]; then
+            echo "Déploiement en PREPROD"
+            # Ici tu mets tes commandes pour staging, ex: scp, rsync, kubectl, etc.
+          elif [ "${GITHUB_REF}" == "refs/heads/main" ]; then
+            echo "Déploiement en PROD"
+            # Ici tes commandes pour prod
+          fi
